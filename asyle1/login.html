@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Asyle Data Solutions</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(30, 20, 60, 0.8) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(10, 30, 60, 0.6) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 80%, rgba(20, 10, 40, 0.7) 0%, transparent 55%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Glass Card */
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            min-height: 500px;
+            padding: 35px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            animation: slideUp 0.8s ease;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Company Branding */
+        .company-branding {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .company-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .company-tagline {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+            font-style: italic;
+        }
+
+        .auth-card h2 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 24px;
+        }
+
+        /* Input Group */
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            outline: none;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .input-group input:focus {
+            transform: scale(1.02);
+            border-color: rgba(138, 124, 255, 0.6);
+            box-shadow: 0 0 0 3px rgba(138, 124, 255, 0.15);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        /* Button */
+        .auth-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+        }
+
+        .auth-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Links */
+        .auth-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .auth-link a {
+            color: #ffd369;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+            opacity: 0.8;
+        }
+
+        /* Popup Overlay */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .popup-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: popupSlide 0.4s ease;
+            position: relative;
+        }
+
+        @keyframes popupSlide {
+            from {
+                transform: scale(0.8) translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .popup-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: iconBounce 0.6s ease;
+        }
+
+        @keyframes iconBounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .popup-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .popup-card p {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .popup-btn {
+            padding: 12px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        /* Error Popup */
+        .error-popup .popup-icon {
+            color: #e74c3c;
+        }
+
+        .error-popup h3 {
+            color: #e74c3c;
+        }
+
+        .error-popup .popup-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+        }
+
+        .error-popup .popup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        /* Success Popup */
+        .success-popup .popup-icon {
+            color: #27ae60;
+        }
+
+        .success-popup h3 {
+            color: #27ae60;
+        }
+
+        .success-popup .popup-btn {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: #fff;
+        }
+
+        .success-popup .popup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        /* Loading Popup */
+        .loading-popup {
+            background: linear-gradient(135deg, #1e0a4a, #0a1e4a);
+            color: #fff;
+        }
+
+        .loading-popup h3 {
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .loading-popup p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 500px) {
+            .auth-card {
+                padding: 25px;
+            }
+
+            .company-name {
+                font-size: 22px;
+            }
+
+            .popup-card {
+                padding: 30px 20px;
+            }
+
+            .popup-icon {
+                font-size: 50px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-card">
+        <!-- Company Branding -->
+        <div class="company-branding">
+            <h1 class="company-name">Asyle Data Solutions</h1>
+            <p class="company-tagline">Empowering Research & Innovation</p>
+        </div>
+
+        <h2>Welcome Back</h2>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <input type="email" name="email" id="email" placeholder="Email Address" required>
+            </div>
+
+            <div class="input-group">
+                <input type="password" name="password" id="password" placeholder="Password" required>
+            </div>
+
+            <button type="submit" class="auth-btn">Login</button>
+        </form>
+
+        <div class="auth-link">
+            Don't have an account? <a href="register.html">Register</a>
+        </div>
+
+        <div class="auth-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Error Popup -->
+    <div class="popup-overlay" id="errorPopup">
+        <div class="popup-card error-popup">
+            <div class="popup-icon">❌</div>
+            <h3>Login Failed</h3>
+            <p id="errorMessage">Invalid email or password</p>
+            <button class="popup-btn" onclick="closePopup('errorPopup')">Try Again</button>
+        </div>
+    </div>
+
+    <!-- Success Popup -->
+    <div class="popup-overlay" id="successPopup">
+        <div class="popup-card success-popup">
+            <div class="popup-icon">✅</div>
+            <h3>Registration Successful!</h3>
+            <p>Your account has been created successfully. Please login to continue.</p>
+            <button class="popup-btn" onclick="closePopup('successPopup')">Login Now</button>
+        </div>
+    </div>
+
+    <!-- Loading Popup -->
+    <div class="popup-overlay" id="loadingPopup">
+        <div class="popup-card loading-popup">
+            <div class="loader"></div>
+            <h3>Logging In...</h3>
+            <p>Please wait a moment</p>
+        </div>
+    </div>
+
+    <script>
+        // Close popup function
+        function closePopup(popupId) {
+            const popup = document.getElementById(popupId);
+            if (popup) {
+                popup.classList.remove('show');
+            }
+        }
+
+        // Show popup function
+        function showPopup(popupId) {
+            const popup = document.getElementById(popupId);
+            if (popup) {
+                popup.classList.add('show');
+            }
+        }
+
+        // Check URL parameters for success message
+        window.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('registered') === 'true') {
+                showPopup('successPopup');
+            }
+        });
+
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById('errorMessage').textContent = 'Please enter a valid email address';
+                showPopup('errorPopup');
+                return;
+            }
+
+            // Validate password
+            if (password.length < 6) {
+                document.getElementById('errorMessage').textContent = 'Password must be at least 6 characters';
+                showPopup('errorPopup');
+                return;
+            }
+
+            // Show loading popup
+            showPopup('loadingPopup');
+
+            // Simulate login request (replace with actual API call)
+            setTimeout(function () {
+                // Get stored users from localStorage
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+                // Find user with matching email
+                const user = users.find(u => u.email === email);
+
+                if (user && user.password === password) {
+                    // Success - store logged in user
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        username: user.username,
+                        email: user.email,
+                        loginTime: new Date().toISOString()
+                    }));
+
+                    // Hide loading
+                    closePopup('loadingPopup');
+
+                    // Redirect to home page
+                    window.location.href = 'index.html';
+                } else {
+                    // Failed login
+                    closePopup('loadingPopup');
+                    document.getElementById('errorMessage').textContent = 'Invalid email or password';
+                    showPopup('errorPopup');
+                }
+            }, 1500);
+        });
+
+        // Clear input borders on focus
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function () {
+                this.style.borderColor = '';
+            });
+        });
+    </script>
+
+</body>
+
+</html>
