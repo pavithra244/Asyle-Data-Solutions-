@@ -1,0 +1,621 @@
+<% locals.hideGlobalChat=true; %>
+    <%- include('partials/header') %>
+
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+            :root {
+                --bg-body: #f8faff;
+                --primary: #6366f1;
+                --secondary: #8b5cf6;
+                --success: #10b981;
+                --warning: #f59e0b;
+                --danger: #ef4444;
+                --text-primary: #0f172a;
+                --text-secondary: #64748b;
+                --card-bg: #ffffff;
+                --border: #e2e8f0;
+                --gradient-hero: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+                --shadow: 0 4px 24px rgba(99, 102, 241, 0.08);
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Inter', sans-serif;
+            }
+
+            body {
+                background-color: var(--bg-body);
+                color: var(--text-primary);
+                transition: all 0.3s ease;
+            }
+
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: var(--primary);
+                border-radius: 10px;
+            }
+
+            /* --- Navbar --- */
+            .navbar-glass {
+                border-bottom: 1px solid var(--border);
+                top: 0;
+                z-index: 1000;
+                padding: 12px 0;
+            }
+
+            .asyle-logo {
+                font-weight: 800;
+                font-size: 1.5rem;
+                background: var(--gradient-hero);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-decoration: none;
+            }
+
+            /* ─────────────────────────────────────────────────────────────────────
+         * LAYOUT FIX
+         * .dashboard-container is a two-column grid:
+         *   col 1 → .main-content  (scrollable left content)
+         *   col 2 → .chat-sidebar  (sticky right panel)
+         *
+         * Before this fix the <aside class="chat-sidebar"> was rendered by
+         * the footer partial OUTSIDE the grid, so it had no column to sit in
+         * and fell below all other content. Now the <aside> is explicitly
+         * placed as the second child of .dashboard-container.
+         * ─────────────────────────────────────────────────────────────────── */
+            .dashboard-container {
+                max-width: 1240px;
+                margin: 0 auto;
+                padding: 0 20px;
+                display: grid;
+                grid-template-columns: 1fr 380px;
+                gap: 32px;
+                align-items: start;
+            }
+
+            @media (max-width: 992px) {
+                .dashboard-container {
+                    grid-template-columns: 1fr;
+                }
+
+                /* Hide the sidebar slot in the grid so it doesn't take up space */
+                .dashboard-container>.chat-sidebar {
+                    position: fixed !important;
+                    /* Force out of flow */
+                }
+            }
+
+            /* Left column scrolls with the page */
+            .main-content {
+                padding: 40px 0;
+                min-width: 0;
+                /* prevents overflow blowing out the grid */
+            }
+
+            /* ─── Right column: sticky chat panel ────────────────────────────── */
+            /* Styles moved to partials/chat-styles.ejs */
+            .file-attachment {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 12px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin-bottom: 8px;
+            }
+
+            .file-icon {
+                width: 48px;
+                height: 48px;
+                background: rgba(37, 211, 102, 0.2);
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: #25D366;
+            }
+
+            .file-details {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .file-name {
+                font-weight: 600;
+                font-size: 0.9rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                color: #e9edef;
+            }
+
+            .file-size {
+                font-size: 0.75rem;
+                color: #8696a0;
+                margin-top: 2px;
+            }
+
+            .file-download-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: rgba(37, 211, 102, 0.2);
+                border: none;
+                color: #25D366;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+                text-decoration: none;
+            }
+
+            .file-download-btn:hover {
+                background: rgba(37, 211, 102, 0.3);
+                transform: scale(1.1);
+            }
+
+            .image-attachment {
+                max-width: 280px;
+                border-radius: 8px;
+                overflow: hidden;
+                margin-bottom: 8px;
+                cursor: pointer;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .image-attachment img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+            .upload-status {
+                background: rgba(37, 211, 102, 0.15);
+                padding: 12px 16px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                margin: 8px 0;
+                border: 1px solid rgba(37, 211, 102, 0.3);
+                color: #e9edef;
+            }
+
+            .upload-status i {
+                color: #25D366;
+            }
+
+            /* .empty-state styles moved to partials/chat-styles.ejs */
+
+            /* --- Hero --- */
+            .welcome-hero {
+                background: var(--gradient-hero);
+                padding: 48px;
+                border-radius: 24px;
+                color: white;
+                margin-bottom: 40px;
+                position: relative;
+                overflow: hidden;
+                animation: slideUp 0.6s ease-out;
+            }
+
+            .welcome-hero h1 {
+                font-size: 2.5rem;
+                font-weight: 800;
+                margin-bottom: 8px;
+            }
+
+            .welcome-hero p {
+                opacity: 0.9;
+                font-size: 1.1rem;
+            }
+
+            .status-banner {
+                background: rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                padding: 16px 24px;
+                border-radius: 16px;
+                margin-top: 24px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-weight: 600;
+                animation: pulseBorder 2s infinite;
+            }
+
+            /* --- Publications --- */
+            .grid-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 24px;
+            }
+
+            .grid-header h2 {
+                font-weight: 800;
+                font-size: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .badge-count {
+                background: var(--primary);
+                color: white;
+                padding: 4px 12px;
+                border-radius: 100px;
+                font-size: 0.8rem;
+            }
+
+            .pub-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                gap: 20px;
+            }
+
+            .pub-card {
+                background: var(--card-bg);
+                border-radius: 16px;
+                border: 1px solid var(--border);
+                box-shadow: var(--shadow);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                cursor: default;
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                animation: fadeIn 0.5s ease-out backwards;
+            }
+
+            .pub-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15);
+                border-color: var(--primary);
+            }
+
+            .pub-top-accent {
+                height: 6px;
+                width: 100%;
+                background: var(--pub-color, var(--primary));
+            }
+
+            .pub-body {
+                padding: 24px;
+                flex: 1;
+            }
+
+            .pub-type-badge {
+                font-size: 0.7rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--pub-color);
+                border: 1px solid var(--pub-color);
+                padding: 2px 8px;
+                border-radius: 4px;
+                margin-bottom: 12px;
+                display: inline-block;
+            }
+
+            .pub-title {
+                font-weight: 700;
+                font-size: 1.15rem;
+                margin-bottom: 8px;
+                color: var(--text-primary);
+            }
+
+            .pub-desc {
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                line-height: 1.6;
+                margin-bottom: 20px;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                line-clamp: 2;
+                overflow: hidden;
+            }
+
+            .pub-footer {
+                padding: 20px 24px;
+                border-top: 1px solid #f1f5f9;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: #fafbff;
+            }
+
+            .pub-date {
+                font-size: 0.8rem;
+                color: var(--text-secondary);
+            }
+
+            .pub-btn {
+                padding: 8px 16px;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 0.85rem;
+                text-decoration: none;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .btn-view {
+                color: var(--primary);
+                background: #f5f7ff;
+            }
+
+            .btn-view:hover {
+                background: #eef2ff;
+            }
+
+            .btn-dl {
+                background: var(--primary);
+                color: white;
+            }
+
+            .btn-dl:hover {
+                background: var(--secondary);
+                transform: scale(1.05);
+            }
+
+            .btn-locked {
+                background: #f1f5f9;
+                color: #94a3b8;
+                cursor: not-allowed;
+            }
+
+            /* ── Toast ── */
+            /* Toast container and other styles moved to partials/chat-styles.ejs */
+        </style>
+
+        <!-- Navbar -->
+        <div class="navbar-glass">
+            <div class="container d-flex justify-content-between align-items-center">
+                <a href="/dashboard" class="asyle-logo"></a>
+                <div class="d-flex align-items-center gap-4">
+                    <div class="dropdown">
+                        <div class="d-flex align-items-center gap-2" id="userMenu" data-bs-toggle="dropdown"
+                            style="cursor: pointer;">
+                            <div class="chat-avatar" style="width: 36px; height: 36px;">
+                                <%= user.username.charAt(0).toUpperCase() %>
+                            </div>
+                            <i class="fas fa-chevron-down text-secondary" style="font-size: 0.7rem;"></i>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end p-2 mt-2 shadow-lg border-0"
+                            style="border-radius: 12px;">
+                            <li><a class="dropdown-item rounded-3" href="/profile"><i
+                                        class="fas fa-user-circle me-2"></i>Profile</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item rounded-3 text-danger" href="/logout"><i
+                                        class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile backdrop -->
+        <div class="chat-backdrop" id="chatBackdrop"></div>
+
+        <!--
+        ROOT FIX ─ The grid now contains BOTH columns as direct children:
+          1. <main class="main-content">   ← left column
+          2. <aside class="chat-sidebar">  ← right column  ✅
+
+        Previously the chat was appended by the footer partial AFTER the
+        closing </div> of .dashboard-container, so the grid had no second
+        column slot for it and it dropped to the bottom of the page.
+    -->
+        <div class="dashboard-container">
+
+            <!-- ── Column 1: page content ───────────────────────────────────── -->
+            <main class="main-content">
+
+                <section class="welcome-hero">
+                    <h1>Welcome back, <%= user.username %>! 👋</h1>
+                    <p>Your research workspace is ready. Access all your publications and collaborate seamlessly.
+                    </p>
+                    <% if (user.status==='pending' ) { %>
+                        <div class="status-banner">
+                            <i class="fas fa-clock-rotate-left fa-lg"></i>
+                            <div>
+                                <div style="font-size: 1.1rem;">Account Pending Approval</div>
+                                <div style="font-size: 0.85rem; opacity: 0.8; font-weight: normal;">
+                                    Some features will be unlocked once an admin approves your profile.
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                </section>
+
+                <% if (user.status==='approved' ) { %>
+
+                    <!-- Activity chart -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 p-4"
+                        style="background: white; border: 1px solid var(--border) !important;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0"><i class="fas fa-chart-line text-primary me-2"></i> My Activity
+                            </h5>
+                            <span class="text-secondary small">Lifetime activity overview</span>
+                        </div>
+                        <div style="height: 180px;"><canvas id="userDashboardChart"></canvas></div>
+                    </div>
+
+                    <!-- Charts row -->
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 24px;">
+                        <div class="card border-0 shadow-sm rounded-4 p-4"
+                            style="background: white; border: 1px solid var(--border) !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold m-0"><i class="fas fa-arrow-trend-up text-success me-2"></i>
+                                    Platform
+                                    Growth</h5>
+                                <span class="text-secondary small">New Publications</span>
+                            </div>
+                            <div style="height: 200px;"><canvas id="platformGrowthChart"></canvas></div>
+                        </div>
+                        <div class="card border-0 shadow-sm rounded-4 p-4"
+                            style="background: white; border: 1px solid var(--border) !important;">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold m-0"><i class="fas fa-comments text-warning me-2"></i> Chat
+                                    Engagement
+                                </h5>
+                                <span class="text-secondary small">Sent vs Received</span>
+                            </div>
+                            <div style="height: 200px;"><canvas id="chatStatsChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <!-- Publications -->
+                    <div class="grid-header">
+                        <h2>
+                            <i class="fas fa-layer-group text-primary"></i> Publications
+                            <span class="badge-count">
+                                <%= publications ? publications.length : 0 %>
+                            </span>
+                        </h2>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Filter</button>
+                            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Sort By</button>
+                        </div>
+                    </div>
+
+                    <div class="pub-grid">
+                        <% if (publications && publications.length> 0) { %>
+                            <% publications.forEach(pub=> {
+                                let accentColor = '#6366f1';
+                                if (pub.file_type === 'PDF') accentColor = '#ef4444';
+                                if (pub.file_type === 'DOCX') accentColor = '#3b82f6';
+                                %>
+                                <div class="pub-card" style="--pub-color: <%= accentColor %>">
+                                    <div class="pub-top-accent"></div>
+                                    <div class="pub-body">
+                                        <span class="pub-type-badge">
+                                            <%= pub.file_type %>
+                                        </span>
+                                        <h3 class="pub-title">
+                                            <%= pub.title %>
+                                        </h3>
+                                        <p class="pub-desc">
+                                            <%= pub.description %>
+                                        </p>
+                                    </div>
+                                    <div class="pub-footer">
+                                        <span class="pub-date">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            <%= new Date(pub.created_at).toLocaleDateString() %>
+                                        </span>
+                                        <div class="d-flex gap-2">
+                                            <% const filename=(pub.file_path || '' ).replace('/uploads/', '' ); const
+                                                secureUrl='/secure/file/' + encodeURIComponent(filename); %>
+                                                <a href="<%= secureUrl %>" target="_blank" class="pub-btn btn-view"
+                                                    title="View Document">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <% if (pub.can_download===true) { %>
+                                                    <a href="<%= secureUrl %>" download class="pub-btn btn-dl"
+                                                        title="Download">
+                                                        <i class="fas fa-download"></i>
+                                                    </a>
+                                                    <% } else { %>
+                                                        <button class="pub-btn btn-locked" title="Download Restricted"
+                                                            disabled>
+                                                            <i class="fas fa-lock"></i>
+                                                        </button>
+                                                        <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div class="text-center py-5 w-100" style="grid-column: 1/-1;">
+                                            <p class="mt-3 text-secondary">No publications shared with you yet.</p>
+                                        </div>
+                                        <% } %>
+                    </div>
+
+                    <% } %>
+            </main>
+            <!-- ── end col 1 ── -->
+
+
+
+            <!-- ── Column 2: chat panel ──────────────────────────────────────
+             This <aside> is now the second direct child of .dashboard-container,
+             so the CSS grid places it correctly in the right column.
+             On desktop:  sticky, fills full viewport height.
+             On mobile:   fixed slide-up drawer triggered by the FAB below.
+        ─────────────────────────────────────────────────────────────────── -->
+            <%- include('partials/chat-widget') %>
+                <!-- ── end col 2 ── -->
+
+        </div><!-- /.dashboard-container -->
+
+
+        <!-- FAB visible only on mobile -->
+
+
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+
+
+            // ── Charts (null-guarded) ────────────────────────────────────────────
+            document.addEventListener('DOMContentLoaded', async () => {
+                const activityCanvas = document.getElementById('userDashboardChart');
+                const growthCanvas = document.getElementById('platformGrowthChart');
+                const chatCanvas = document.getElementById('chatStatsChart');
+
+                if (!activityCanvas && !growthCanvas && !chatCanvas) return;
+
+                try {
+                    const data = await fetch('/api/user-stats').then(r => r.json());
+
+                    if (activityCanvas) {
+                        new Chart(activityCanvas.getContext('2d'), {
+                            type: 'doughnut',
+                            data: { labels: ['Accessible', 'Locked'], datasets: [{ data: [data.accessible, Math.max(0, data.total - data.accessible)], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }] },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, title: { display: true, text: 'Resource Access' } } }
+                        });
+                    }
+
+                    if (growthCanvas) {
+                        new Chart(growthCanvas.getContext('2d'), {
+                            type: 'line',
+                            data: { labels: data.platformGrowth.map(d => d.month), datasets: [{ label: 'New Publications', data: data.platformGrowth.map(d => d.count), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.4, pointBackgroundColor: '#fff', pointBorderColor: '#10b981', pointRadius: 4 }] },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
+                        });
+                    }
+
+                    if (chatCanvas) {
+                        new Chart(chatCanvas.getContext('2d'), {
+                            type: 'bar',
+                            data: { labels: ['Sent', 'Received'], datasets: [{ label: 'Messages', data: [data.chatStats.sent, data.chatStats.received], backgroundColor: ['#6366f1', '#f59e0b'], borderRadius: 8, barThickness: 50 }] },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
+                        });
+                    }
+                } catch (err) { console.error('Chart Error:', err); }
+            });
+        </script>
+
+        <%- include('partials/footer') %>

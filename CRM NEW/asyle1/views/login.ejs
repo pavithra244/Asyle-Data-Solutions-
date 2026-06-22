@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login | Asyle Data Solutions</title>
+    <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+
+<div class="auth-card">
+    <!-- Company Logo/Name -->
+    <div class="company-branding">
+        <h1 class="company-name">Asyle Data Solutions</h1>
+        <p class="company-tagline">Empowering Research & Innovation</p>
+    </div>
+
+    <h2>Welcome Back</h2>
+
+    <!-- Error Popup -->
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="popup-overlay" id="errorPopup">
+            <div class="popup-card error-popup">
+                <div class="popup-icon">❌</div>
+                <h3>Login Failed</h3>
+                <p><%= error %></p>
+                <button class="popup-btn" onclick="closePopup()">Try Again</button>
+            </div>
+        </div>
+    <% } %>
+
+    <form method="POST" action="/login">
+        <div class="input-group">
+            <input type="email" name="email" placeholder="Email Address" required>
+        </div> <br>
+
+        <div class="input-group">
+            <input type="password" name="password" placeholder="Password" required>
+        </div> <br> 
+
+        <button class="auth-btn">Login</button>
+    </form>
+      
+    <div class="auth-link">
+        Don't have an account? <a href="/register">Register</a>
+    </div>
+</div>
+
+<script>
+    function closePopup() {
+        document.getElementById('errorPopup').style.display = 'none';
+    }
+
+    // Auto-show popup if error exists
+    window.onload = function() {
+        const popup = document.getElementById('errorPopup');
+        if (popup) {
+            popup.style.display = 'flex';
+        }
+    }
+</script>
+
+</body>
+</html>

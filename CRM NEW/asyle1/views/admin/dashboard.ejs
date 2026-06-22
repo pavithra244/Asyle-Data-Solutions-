@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Asyle</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin-dashboard.css">
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <span>Asyle Admin</span>
+        </div>
+        <nav class="nav-links">
+            <a href="/admin/dashboard" class="nav-link active">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/admin/users" class="nav-link">
+                <i class="fas fa-users"></i> Users
+            </a>
+            <a href="/admin/publications" class="nav-link">
+                <i class="fas fa-file-alt"></i> Publications
+            </a>
+            <a href="/admin/chat" class="nav-link">
+                <i class="fas fa-comments"></i> Chat Support
+            </a>
+            <a href="/logout" class="nav-link logout-link">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+    </aside>
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <main class="main-wrapper">
+        <header class="top-navbar">
+            <button class="menu-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2 style="font-weight: 800;">Overview</h2>
+            <div class="admin-profile">
+                <div class="admin-info" style="text-align: right;">
+                    <p style="font-weight: 700; font-size: 0.9rem;">
+                        <%= admin.username %>
+                    </p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">Super Admin</p>
+                </div>
+                <div class="avatar">
+                    <%= admin.username.charAt(0).toUpperCase() %>
+                </div>
+            </div>
+        </header>
+
+        <section class="hero-card">
+            <h1>Good morning, Admin 👋</h1>
+            <p>Here's what's happening on your platform today.</p>
+            <div class="hero-chips">
+                <div class="hero-chip"><i class="fas fa-users me-2"></i>
+                    <%= userCount %> Total Users
+                </div>
+                <div class="hero-chip" style="background: rgba(245, 158, 11, 0.3);"><i class="fas fa-clock me-2"></i>
+                    <%= pendingCount %> Pending
+                </div>
+            </div>
+        </section>
+
+        <div class="stats-grid">
+            <div class="stat-card" style="--accent-color: #6366f1; animation-delay: 0.1s;">
+                <div class="stat-header">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <i class="fas fa-arrow-up-right" style="color: var(--success);"></i>
+                </div>
+                <div class="stat-value counter" data-target="<%= userCount %>">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card" style="--accent-color: #f59e0b; animation-delay: 0.2s;">
+                <div class="stat-header">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                </div>
+                <div class="stat-value counter" data-target="<%= pendingCount %>">0</div>
+                <div class="stat-label">Pending Approvals</div>
+            </div>
+            <div class="stat-card" style="--accent-color: #10b981; animation-delay: 0.3s;">
+                <div class="stat-header">
+                    <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                </div>
+                <div class="stat-value counter" data-target="<%= pubCount %>">0</div>
+                <div class="stat-label">Publications</div>
+            </div>
+            <div class="stat-card" style="--accent-color: #8b5cf6; animation-delay: 0.4s;">
+                <div class="stat-header">
+                    <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                </div>
+                <div class="stat-value">Active</div>
+                <div class="stat-label">Chat Support</div>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>User Activity</h3>
+                    <select
+                        style="border: none; background: #f8faff; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.8rem;">
+                        <option>Last 6 Months</option>
+                    </select>
+                </div>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="userGrowthChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>User Status</h3>
+                </div>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="pubTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Publications History</h3>
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Last 6 Months</span>
+                </div>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="pubGrowthChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Support Traffic</h3>
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Last 7 Days</span>
+                </div>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="msgActivityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header">
+                <h3 style="font-weight: 700;">Recent Registrations</h3>
+                <a href="/admin/users"
+                    style="color: var(--primary); font-weight: 600; text-decoration: none; font-size: 0.9rem;">View
+                    All</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (users && users.length> 0) { %>
+                            <% users.slice(0, 5).forEach(user=> { %>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <div class="avatar"
+                                                style="width: 32px; height: 32px; font-size: 0.8rem; border-radius: 8px;">
+                                                <%= user.username.charAt(0).toUpperCase() %>
+                                            </div>
+                                            <span style="font-weight: 600;">
+                                                <%= user.username %>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 0.9rem;">
+                                        <%= user.email %>
+                                    </td>
+                                    <td>
+                                        <% if (user.status==='pending' ) { %>
+                                            <span class="status-badge badge-pending"><i class="fas fa-circle-dot"></i>
+                                                Pending</span>
+                                            <% } else if (user.status==='approved' ) { %>
+                                                <span class="status-badge badge-approved"><i
+                                                        class="fas fa-check-circle"></i> Approved</span>
+                                                <% } else { %>
+                                                    <span class="status-badge badge-denied"><i
+                                                            class="fas fa-times-circle"></i> Denied</span>
+                                                    <% } %>
+                                    </td>
+                                    <td>
+                                        <span
+                                            class="role-pill <%= user.role === 'admin' ? 'role-admin' : 'role-customer' %>">
+                                            <%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px;">
+                                            <a href="/admin/users" class="btn-action" title="Manage User"><i
+                                                    class="fas fa-user-gear"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="5"
+                                                style="text-align: center; padding: 40px; color: var(--text-muted);">No
+                                                recent registrations found</td>
+                                        </tr>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="actions-grid">
+            <a href="/admin/users" class="action-card">
+                <div class="action-icon"><i class="fas fa-user-plus"></i></div>
+                <div class="action-info">
+                    <h4>Manage Users</h4>
+                    <p>Approve or restrict platform access</p>
+                </div>
+            </a>
+            <a href="/admin/publications" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i
+                        class="fas fa-upload"></i></div>
+                <div class="action-info">
+                    <h4>Upload Resource</h4>
+                    <p>Share new research or documents</p>
+                </div>
+            </a>
+            <a href="/admin/chat" class="action-card">
+                <div class="action-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i
+                        class="fas fa-headset"></i></div>
+                <div class="action-info">
+                    <h4>View All Chats</h4>
+                    <p>Respond to customer inquiries</p>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // --- Counters ---
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            const inc = target / 100;
+            let count = 0;
+            const updateCount = () => {
+                if (count < target) {
+                    count += inc;
+                    counter.innerText = Math.ceil(count);
+                    setTimeout(updateCount, 10);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+            updateCount();
+        });
+
+        // --- Charts ---
+        async function loadCharts() {
+            try {
+                const res = await fetch('/admin/stats-data');
+                const data = await res.json();
+
+                // User Growth
+                const userCtx = document.getElementById('userGrowthChart').getContext('2d');
+                const userGradient = userCtx.createLinearGradient(0, 0, 0, 300);
+                userGradient.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+                userGradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+                new Chart(userCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.userGrowth.map(d => d.month),
+                        datasets: [{
+                            label: 'New Users',
+                            data: data.userGrowth.map(d => d.count),
+                            borderColor: '#6366f1',
+                            backgroundColor: userGradient,
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#6366f1',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#e2e8f0', drawBorder: false } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+
+                // Status/Pub Types
+                const pubCtx = document.getElementById('pubTypeChart').getContext('2d');
+                new Chart(pubCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.pubStats.map(d => d.file_type || 'Unknown'),
+                        datasets: [{
+                            data: data.pubStats.map(d => d.count),
+                            backgroundColor: ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'],
+                            borderWidth: 0,
+                            borderRadius: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } }
+                    }
+                });
+
+                // Publications Growth
+                const pubGrowthCtx = document.getElementById('pubGrowthChart').getContext('2d');
+                new Chart(pubGrowthCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.pubGrowth.map(d => d.month),
+                        datasets: [{
+                            label: 'Uploads',
+                            data: data.pubGrowth.map(d => d.count),
+                            backgroundColor: '#10b981',
+                            borderRadius: 6,
+                            barThickness: 30
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#e2e8f0', drawBorder: false } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+
+                // Message Activity
+                const msgCtx = document.getElementById('msgActivityChart').getContext('2d');
+                new Chart(msgCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.msgActivity.map(d => d.date),
+                        datasets: [{
+                            label: 'Messages',
+                            data: data.msgActivity.map(d => d.count),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#f59e0b',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#e2e8f0', drawBorder: false } },
+                            x: { grid: { display: false }, ticks: { maxTicksLimit: 7 } }
+                        }
+                    }
+                });
+            } catch (err) { console.error("Chart Error:", err); }
+        }
+        loadCharts();
+    </script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+
+</html>

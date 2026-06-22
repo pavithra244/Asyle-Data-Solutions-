@@ -1,0 +1,383 @@
+<%- include('partials/header') %>
+
+<div class="page-header parallaxie" style="background-image: url('images/people-working.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-12">
+                <div class="page-header-box">
+                    <h1 class="wow fadeInUp" data-cursor="-opaque">Research Consultant</h1>
+                    <nav class="wow fadeInUp" data-wow-delay="0.2s">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="./">home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Research Consultant</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="research-consultancy-section py-5">
+  <div class="container">
+
+    <div class="section-header text-center mb-5">
+      <h2>Research Consultancy & Academic Advisory Services</h2>
+      <p>
+        Structured, ethical, and expert-driven guidance for scholars, PhD candidates, faculty,
+        institutions, and industry researchers across multidisciplinary domains.
+      </p>
+    </div>
+
+    <div class="trust-stats mb-5">
+      <div>
+        <h3>12+</h3>
+        <p>Years of Academic Mentorship</p>
+      </div>
+      <div>
+        <h3>500+</h3>
+        <p>Research Projects Guided</p>
+      </div>
+      <div>
+        <h3>300+</h3>
+        <p>Scopus / SCI Publications Supported</p>
+      </div>
+      <div>
+        <h3>20+</h3>
+        <p>Expert Research Mentors</p>
+      </div>
+    </div>
+
+    <div class="intro-text text-center mb-5">
+      <p>
+        Our consultancy supports researchers throughout the entire lifecycle — from idea
+        conception to validated results suitable for theses, funded projects, patents, and
+        high-impact publications.
+      </p>
+      <p>
+        We follow strict academic integrity policies and focus on mentorship-oriented guidance,
+        originality assurance, and reviewer-aligned research development.
+      </p>
+    </div>
+
+    <div class="row g-5">
+
+      <div class="col-lg-5">
+        <h4 class="side-heading mb-4">Research Consultancy Workflow</h4>
+        <div class="workflow-image mt-4">
+          <img src="images/custom-software-development-services.png" alt="Research Consultancy">
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="form-card p-4 p-lg-5">
+
+          <h4>Request Research Consultancy</h4>
+          <p class="form-desc mb-4">
+            Share your research objectives. Our experts will respond with a structured guidance plan.
+          </p>
+
+          <div class="domain-tags mb-4">
+            <span>AI & Data Science</span>
+            <span>Engineering</span>
+            <span>Medical Sciences</span>
+            <span>Management</span>
+            <span>Interdisciplinary</span>
+          </div>
+
+          <form>
+            <div class="row g-3">
+              <div class="col-md-6"><input type="text" placeholder="Full Name" required></div>
+              <div class="col-md-6"><input type="email" placeholder="Email Address" required></div>
+              <div class="col-md-6"><input type="text" placeholder="University / Organization"></div>
+
+              <div class="col-md-6">
+                <select required>
+                  <option value="">Academic Level</option>
+                  <option>UG / PG</option>
+                  <option>PhD</option>
+                  <option>Post Doctoral</option>
+                  <option>Faculty</option>
+                </select>
+              </div>
+
+              <div class="col-12">
+                <textarea rows="4" placeholder="Describe your research problem or expectations" required></textarea>
+              </div>
+
+              <div class="col-md-6">
+                <input type="file">
+              </div>
+
+              <div class="col-md-6">
+                <input type="date">
+              </div>
+
+              <div class="col-12 consent">
+                <input type="checkbox" required>
+                <label>I confirm that this request follows academic ethics and originality guidelines.</label>
+              </div>
+
+              <div class="col-12 text-end">
+                <button type="submit">Submit Consultancy Request</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-section mt-5">
+      <h3 class="text-center mb-4">Frequently Asked Research Queries</h3>
+      <details><summary>Do you provide ready-made research content?</summary><p>No. We offer mentorship-only guidance ensuring originality.</p></details>
+      <details><summary>Will you support Scopus / SCI submissions?</summary><p>Yes, including reviewer response strategies.</p></details>
+      <details><summary>Is plagiarism checking included?</summary><p>We guide compliance and interpretation, not direct manipulation.</p></details>
+    </div>
+  </div>
+</section>
+<style>
+
+.research-consultancy-section {
+  background: linear-gradient(180deg, #ffffff, #ffffff);
+  font-family: "Inter", "Segoe UI", sans-serif;
+  color: #1e293b;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-header h2 {
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.3px;
+}
+
+.section-header p {
+  max-width: 860px;
+  margin: auto;
+  font-size: 1.05rem;
+  color: #475569;
+}
+
+.trust-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 22px;
+}
+
+.trust-stats div {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid #e5e7eb;
+  padding: 26px 18px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+  transition: all 0.35s ease;
+}
+
+.trust-stats div:hover {
+  transform: translateY(-8px);
+  border-color: #ffffff;
+}
+
+.trust-stats h3 {
+  font-size: 2.1rem;
+  color: #ff6600;
+}
+
+.trust-stats p {
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.intro-text p {
+  max-width: 940px;
+  margin: auto;
+  font-size: 1rem;
+  color: #334155;
+}
+
+.side-heading {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.workflow-steps {
+  position: relative;
+  padding-left: 24px;
+}
+
+.workflow-steps::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(#323232, transparent);
+}
+
+.workflow-steps .step {
+  display: flex;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.workflow-steps .step span {
+  background: linear-gradient(135deg, #0d0d0d, #0b0b0b);
+  color: #fff;
+  font-weight: 600;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workflow-steps h5 {
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.workflow-steps p {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.workflow-image img {
+  width: 100%;
+  border-radius: 22px;
+}
+
+.form-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(14px);
+  border-radius: 24px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.12);
+}
+
+.form-card h4 {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.form-desc {
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.domain-tags span {
+  display: inline-block;
+  background: #dde5ff;
+  color: #070056;
+  padding: 6px 18px;
+  border-radius: 30px;
+  font-size: 0.90rem;
+}
+
+.form-card input,
+.form-card select,
+.form-card textarea {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #0f172a;
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+.form-card input::placeholder,
+.form-card textarea::placeholder {
+  color: #94a3b8;
+}
+
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
+}
+
+.consent label {
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.form-card button {
+  background: linear-gradient(135deg, #000000, #000000);
+  color: #ffffff;
+  border: none;
+  padding: 12px 36px;
+  border-radius: 40px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  transition: all 0.3s ease;
+}
+
+.form-card button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(99, 102, 241, 0.45);
+}
+
+.faq-section details {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.05);
+}
+
+.faq-section summary {
+  cursor: pointer;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.faq-section p {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.cta-strip {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  border-radius: 26px;
+  padding: 48px 25px;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+}
+
+.cta-strip h4 {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.cta-strip p {
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.cta-strip a {
+  background: linear-gradient(135deg, #6366f1, #4338ca);
+  color: #ffffff;
+  padding: 12px 32px;
+  border-radius: 30px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.cta-strip a:hover {
+  box-shadow: 0 14px 30px rgba(99, 102, 241, 0.45);
+}
+
+</style>
+
+<%- include('partials/footer') %>

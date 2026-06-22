@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error | Asyle</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+    <div class="admin-container"
+        style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div class="glass-card" style="max-width: 500px; text-align: center; padding: 40px;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #ef4444; margin-bottom: 24px;"></i>
+            <h1 style="color: #e9edef; margin-bottom: 16px;">Oops! Something went wrong</h1>
+            <p style="color: #8696a0; margin-bottom: 32px; font-size: 1.1rem;">
+                <%= typeof message !=='undefined' ? message : 'An unexpected error occurred.' %>
+            </p>
+            <a href="javascript:history.back()" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Go Back
+            </a>
+        </div>
+    </div>
+</body>
+
+</html>

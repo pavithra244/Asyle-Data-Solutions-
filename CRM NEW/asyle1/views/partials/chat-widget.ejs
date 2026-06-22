@@ -1,0 +1,489 @@
+<aside class="chat-sidebar" id="chatSidebar">
+    <div class="chat-panel">
+        <div class="chat-header">
+            <div class="chat-user">
+                <div class="chat-avatar" id="chat-header-avatar">AS</div>
+                <div class="online-dot" id="chat-online-dot"></div>
+                <div class="chat-info">
+                    <h4>Asyle Support</h4>
+                    <p id="admin-status-text">🟢 Support Online</p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span id="admin-status-badge" class="admin-status-badge status-online">LIVE</span>
+                <button class="chat-btn d-lg-none"
+                    onclick="document.getElementById('chatSidebar').classList.remove('active')">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <button class="chat-btn" onclick="clearChat()" title="Clear Chat history">
+                    <i class="fas fa-eraser"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="messagesArea"></div>
+
+        <div class="chat-input-area">
+            <div class="emoji-picker" id="emojiPicker">
+                <div class="emoji-grid" id="emojiGrid"></div>
+            </div>
+
+            <button class="chat-btn" id="emojiBtn">😊</button>
+            <div class="chat-input-container">
+                <button class="chat-btn" id="attachBtn"><i class="fas fa-plus"></i></button>
+                <textarea id="messageInput" class="chat-input" placeholder="Type a message..." rows="1"></textarea>
+            </div>
+            <button class="chat-btn btn-send" id="sendBtn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</aside>
+
+<button class="chat-toggle-fab" onclick="document.getElementById('chatSidebar').classList.toggle('active')">
+    <i class="fas fa-comment-dots"></i>
+</button>
+
+<input type="file" id="fileInput" style="display:none;" accept="image/*,.pdf,.doc,.docx,.txt">
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Socket.io should be included in layout/footer if not already present, but ensuring it here if needed -->
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    // ── SOCKET & STATE ───────────────────────────────────────────────────
+    // Check if socket is already initialized to avoid multiple connections
+    const socket = io();
+
+    // The server identifies the customer/guest from the session. We pass 0 as a signal
+    // to the server that this user wants their own history.
+    const ADMIN_ID = 0;
+
+    const messagesArea = document.getElementById('messagesArea');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const attachBtn = document.getElementById('attachBtn');
+    const emojiBtn = document.getElementById('emojiBtn');
+    const fileInput = document.getElementById('fileInput');
+    let typingTimer = null;
+    let aiThinkingTimer = null;
+    let isAIMode = false;
+
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return; // Guard clause
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle';
+        toast.innerHTML = `<i class="fas fa-${icon} toast-icon"></i><span>${escapeHtml(message)}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(400px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function loadChatHistory() {
+        if (!messagesArea) return;
+
+        // BUG FIX: Customer fetches their own history.
+        fetch(`/chat/history/${ADMIN_ID}`)
+            .then(r => r.json())
+            .then(messages => {
+                if (!messages || messages.length === 0) {
+                    messagesArea.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-comment-dots"></i>
+                            <h3>Start a Conversation</h3>
+                            <p>Send a message to our support team</p>
+                        </div>`;
+                } else {
+                    renderMessages(messages);
+                }
+            })
+            .catch(() => showToast('Failed to load message history', 'error'));
+    }
+
+    function renderMessages(messages) {
+        messagesArea.innerHTML = '';
+        let currentDate = null;
+
+        messages.forEach(msg => {
+            const msgDate = new Date(msg.created_at).toDateString();
+            if (msgDate !== currentDate) {
+                currentDate = msgDate;
+                messagesArea.appendChild(createDateDivider(msg.created_at));
+            }
+            messagesArea.appendChild(createMessageElement(msg));
+        });
+
+        scrollToBottom();
+    }
+
+    function createDateDivider(timestamp) {
+        const div = document.createElement('div');
+        div.className = 'date-divider';
+        const date = new Date(timestamp);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        let label;
+        if (date.toDateString() === today.toDateString()) label = 'Today';
+        else if (date.toDateString() === yesterday.toDateString()) label = 'Yesterday';
+        else label = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        div.innerHTML = `<span class="date-label">${label}</span>`;
+        return div;
+    }
+
+    function createMessageElement(msg) {
+        const isOutgoing = msg.sender_role === 'customer';
+        const isAI = msg.isAI || false;
+        const div = document.createElement('div');
+        div.className = `message ${isOutgoing ? 'outgoing' : 'incoming'} ${isAI ? 'ai-message' : ''}`;
+        div.id = `msg-${msg.id}`;
+
+        if (msg.is_deleted) {
+            div.classList.add('message-deleted');
+            div.innerHTML = `<div class="message-bubble"><div class="message-text"><i class="fas fa-ban me-2"></i><em>This message was deleted</em></div></div>`;
+            return div;
+        }
+
+        const time = new Date(msg.created_at || Date.now()).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        let contentHtml = '';
+
+        if (isAI) {
+            contentHtml += `<div class="ai-indicator-pill"><i class="fas fa-robot"></i> AI Assistant</div>`;
+        }
+
+        // BUG FIX: Validate file_path is a safe relative path before rendering
+        const safePath = (p) => {
+            if (!p || typeof p !== 'string') return null;
+            if (!p.startsWith('/uploads/')) return null;
+            return p;
+        };
+
+        if (msg.type === 'image' && safePath(msg.file_path)) {
+            const sp = safePath(msg.file_path);
+            contentHtml += `<div class="image-attachment" onclick="window.open(${JSON.stringify(sp)},'_blank')"><img src="${escapeAttr(sp)}" alt="Image" loading="lazy"></div>`;
+        } else if (msg.type === 'file' && safePath(msg.file_path)) {
+            const sp = safePath(msg.file_path);
+            contentHtml += `
+                <div class="file-attachment">
+                    <div class="file-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="file-details">
+                        <div class="file-name">${escapeHtml(msg.file_name || 'File')}</div>
+                        <div class="file-size">${formatFileSize(msg.file_size)}</div>
+                    </div>
+                    <a href="${escapeAttr(sp)}" download="${escapeAttr(msg.file_name || 'file')}" class="file-download-btn"><i class="fas fa-download"></i></a>
+                </div>`;
+        }
+
+        if (msg.message && msg.message.trim()) {
+            contentHtml += `<div class="message-text">${escapeHtml(msg.message)}</div>`;
+        }
+
+        const isTemp = typeof msg.id === 'string' && msg.id.startsWith('temp-');
+        const deleteAction = isOutgoing && !isTemp
+            ? `<div class="message-actions">
+                    <button class="message-action-btn" onclick="deleteForMe(${JSON.stringify(msg.id)})" title="Delete for me">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+               </div>`
+            : '';
+
+        div.innerHTML = `
+            <div class="message-bubble shadow-sm">
+                ${contentHtml}
+                <div class="message-meta">
+                    <span>${time}</span>
+                    ${isOutgoing ? '<span><i class="fas fa-check-double" style="color:#53bdeb;"></i></span>' : ''}
+                </div>
+            </div>
+            ${deleteAction}`;
+
+        return div;
+    }
+
+    function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        socket.emit('chat_message', { text, type: 'text' });
+
+        const emptyState = messagesArea.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
+
+        messagesArea.appendChild(createMessageElement({
+            id: 'temp-' + Date.now(),
+            sender_role: 'customer',
+            message: text,
+            created_at: new Date(),
+            type: 'text'
+        }));
+
+        if (aiThinkingTimer) clearTimeout(aiThinkingTimer);
+
+        if (isAIMode) {
+            aiThinkingTimer = setTimeout(() => {
+                if (!document.getElementById('ai-thinking-el')) {
+                    const el = document.createElement('div');
+                    el.id = 'ai-thinking-el';
+                    el.className = 'ai-thinking';
+                    el.innerHTML = `<span></span><span></span><span></span>`;
+                    messagesArea.appendChild(el);
+                    scrollToBottom();
+                }
+            }, 600);
+        }
+
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        scrollToBottom();
+    }
+
+    function clearChat() {
+        if (!confirm('Clear this chat?\nMessages will be hidden for you only.\nAsyle Support will still see the history.')) return;
+
+        fetch(`/chat/clear/${ADMIN_ID}`, { method: 'PUT' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    messagesArea.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-comment-dots"></i>
+                            <h3>Chat cleared</h3>
+                            <p>Send a new message to start a fresh conversation</p>
+                        </div>`;
+                    showToast('Chat cleared', 'success');
+                } else {
+                    showToast('Failed to clear chat', 'error');
+                }
+            })
+            .catch(() => showToast('Failed to clear chat', 'error'));
+    }
+
+    function deleteForMe(messageId) {
+        if (!confirm('Delete this message for you?')) return;
+        fetch('/chat/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messageId, type: 'me' })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const el = document.getElementById(`msg-${messageId}`);
+                    if (el) el.remove();
+                } else {
+                    showToast('Delete failed', 'error');
+                }
+            })
+            .catch(() => showToast('Delete failed', 'error'));
+    }
+
+    // Socket Events
+    socket.on('receive_message', (msg) => {
+        if (aiThinkingTimer) { clearTimeout(aiThinkingTimer); aiThinkingTimer = null; }
+        const thinking = document.getElementById('ai-thinking-el');
+        if (thinking) thinking.remove();
+
+        const emptyState = messagesArea.querySelector('.empty-state');
+        if (emptyState) emptyState.remove();
+
+        messagesArea.appendChild(createMessageElement({
+            id: msg.id,
+            sender_role: 'admin',
+            message: msg.text,
+            created_at: msg.timestamp || new Date(),
+            type: msg.type || 'text',
+            file_path: msg.fileData?.filePath,
+            file_name: msg.fileData?.fileName,
+            file_size: msg.fileData?.fileSize,
+            isAI: msg.isAI
+        }));
+
+        scrollToBottom();
+    });
+
+    socket.on('message_deleted', (data) => {
+        const msgDiv = document.getElementById(`msg-${data.messageId}`);
+        if (msgDiv) {
+            msgDiv.classList.add('message-deleted');
+            msgDiv.innerHTML = `<div class="message-bubble"><div class="message-text"><i class="fas fa-ban me-2"></i><em>This message was deleted</em></div></div>`;
+        }
+    });
+
+    socket.on('display_typing', () => {
+        if (!document.getElementById('typing-el')) {
+            const el = document.createElement('div');
+            el.id = 'typing-el';
+            el.style.cssText = 'display:flex;align-items:center;gap:4px;padding:8px 12px;background:#202c33;border-radius:18px;width:fit-content;margin:4px 0;';
+            el.innerHTML = `<span style="width:8px;height:8px;background:#8696a0;border-radius:50%;animation:typingDot 1.4s infinite;display:inline-block;"></span><span style="width:8px;height:8px;background:#8696a0;border-radius:50%;animation:typingDot 1.4s 0.2s infinite;display:inline-block;"></span><span style="width:8px;height:8px;background:#8696a0;border-radius:50%;animation:typingDot 1.4s 0.4s infinite;display:inline-block;"></span>`;
+            messagesArea.appendChild(el);
+            scrollToBottom();
+        }
+    });
+
+    socket.on('hide_typing', () => {
+        const el = document.getElementById('typing-el');
+        if (el) el.remove();
+    });
+
+    socket.on('admin_status', (data) => {
+        const statusText = document.getElementById('admin-status-text');
+        const statusBadge = document.getElementById('admin-status-badge');
+        const onlineDot = document.getElementById('chat-online-dot');
+        const headerAvatar = document.getElementById('chat-header-avatar');
+
+        isAIMode = !data.online;
+
+        if (statusText && statusBadge && onlineDot && headerAvatar) {
+            if (data.online) {
+                statusText.textContent = '🟢 Support Online';
+                statusBadge.textContent = 'LIVE';
+                statusBadge.className = 'admin-status-badge status-online';
+                onlineDot.style.background = '#25D366';
+                headerAvatar.classList.remove('bot-avatar');
+                headerAvatar.textContent = 'AS';
+            } else {
+                statusText.textContent = '🤖 AI Assistant Active';
+                statusBadge.textContent = 'AI';
+                statusBadge.className = 'admin-status-badge status-ai';
+                onlineDot.style.background = '#8b5cf6';
+                headerAvatar.classList.add('bot-avatar');
+                headerAvatar.innerHTML = '<i class="fas fa-robot"></i>';
+            }
+        }
+    });
+
+    // File Upload
+    if (attachBtn) {
+        attachBtn.addEventListener('click', () => fileInput.click());
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const status = document.createElement('div');
+            status.className = 'upload-status';
+            status.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span>Uploading ${escapeHtml(file.name)}...</span>`;
+            messagesArea.appendChild(status);
+            scrollToBottom();
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/chat/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+                status.remove();
+
+                if (data.error) { showToast(data.error, 'error'); return; }
+
+                socket.emit('chat_message', { text: '', type: data.type, fileData: data });
+
+                messagesArea.appendChild(createMessageElement({
+                    id: 'temp-' + Date.now(),
+                    sender_role: 'customer',
+                    message: '',
+                    created_at: new Date(),
+                    type: data.type,
+                    file_path: data.filePath,
+                    file_name: data.fileName,
+                    file_size: data.fileSize
+                }));
+
+                showToast('File uploaded successfully', 'success');
+                scrollToBottom();
+            } catch (err) {
+                status.remove();
+                showToast('Upload failed', 'error');
+            }
+            fileInput.value = '';
+        });
+    }
+
+    if (sendBtn) {
+        sendBtn.addEventListener('click', sendMessage);
+    }
+
+    if (messageInput) {
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        });
+
+        messageInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            socket.emit('typing');
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => socket.emit('stop_typing'), 1500);
+        });
+    }
+
+    // Emoji
+    const emojis = ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '🥺', '😢', '😭', '😤', '😠', '🤯', '😳', '😱', '🤗', '🤔', '😶', '😐', '😑', '😬', '🙄', '😴', '🤢', '🤧', '😷', '👍', '👎', '👌', '✌️', '🤞', '👏', '🙌', '🙏', '💪', '❤️', '🧡', '💛', '💚', '💙', '💜', '🔥', '✨', '⭐', '💯', '✔️', '❌'];
+    const emojiGrid = document.getElementById('emojiGrid');
+    if (emojiGrid) {
+        emojis.forEach(e => {
+            const item = document.createElement('div');
+            item.className = 'emoji-item';
+            item.textContent = e;
+            item.onclick = () => {
+                messageInput.value += e;
+                messageInput.focus();
+                document.getElementById('emojiPicker').classList.remove('show');
+            };
+            emojiGrid.appendChild(item);
+        });
+    }
+
+    if (emojiBtn) {
+        emojiBtn.addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            const picker = document.getElementById('emojiPicker');
+            picker.classList.toggle('show');
+            if (picker.classList.contains('show')) {
+                setTimeout(() => {
+                    document.addEventListener('click', function close(ev) {
+                        if (!picker.contains(ev.target) && ev.target !== emojiBtn) {
+                            picker.classList.remove('show');
+                            document.removeEventListener('click', close);
+                        }
+                    });
+                }, 100);
+            }
+        });
+    }
+
+    // Helpers
+    function scrollToBottom() {
+        if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    function formatFileSize(bytes) {
+        if (!bytes) return 'Unknown';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let size = bytes, i = 0;
+        while (size >= 1024 && i < units.length - 1) { size /= 1024; i++; }
+        return `${size.toFixed(1)} ${units[i]}`;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = String(text || '');
+        return div.innerHTML;
+    }
+
+    function escapeAttr(text) {
+        return String(text || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // Initialize
+    loadChatHistory();
+</script>

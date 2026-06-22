@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register | Asyle Data Solutions</title>
+    <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+
+<div class="auth-card">
+    <!-- Company Logo/Name -->
+    <div class="company-branding">
+        <h1 class="company-name">Asyle Data Solutions</h1>
+        <p class="company-tagline">Empowering Research & Innovation</p>
+    </div>
+
+    <h2>Create Account</h2>
+
+    <!-- Error Popup -->
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="popup-overlay" id="errorPopup">
+            <div class="popup-card error-popup">
+                <div class="popup-icon">⚠️</div>
+                <h3>Registration Failed</h3>
+                <p><%= error %></p>
+                <button class="popup-btn" onclick="closePopup()">Try Again</button>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Success Popup (if redirected from successful registration) -->
+    <% if (typeof success !== 'undefined' && success) { %>
+        <div class="popup-overlay" id="successPopup">
+            <div class="popup-card success-popup">
+                <div class="popup-icon">✅</div>
+                <h3>Registration Successful!</h3>
+                <p>Your account has been created successfully. Please login to continue.</p>
+                <button class="popup-btn" onclick="closePopup()">Continue</button>
+            </div>
+        </div>
+    <% } %>
+
+    <form method="POST" action="/register" id="registerForm">
+        <div class="input-group">
+            <input type="text" name="username" placeholder="Username" required>
+        </div>
+
+        <div class="input-group">
+            <input type="email" name="email" placeholder="Email Address" required>
+        </div>
+
+        <div class="input-group">
+            <input type="password" name="password" placeholder="Password (min 6 characters)" required minlength="6">
+        </div>
+
+        <button class="auth-btn" type="submit">Register</button>
+    </form>
+
+    <div class="auth-link">
+        Already have an account? <a href="/login">Login</a>
+    </div>
+</div>
+
+<!-- Loading Popup -->
+<div class="popup-overlay" id="loadingPopup" style="display: none;">
+    <div class="popup-card loading-popup">
+        <div class="loader"></div>
+        <h3>Creating Your Account...</h3>
+        <p>Please wait a moment</p>
+    </div>
+</div>
+
+<script>
+    function closePopup() {
+        const errorPopup = document.getElementById('errorPopup');
+        const successPopup = document.getElementById('successPopup');
+        if (errorPopup) errorPopup.style.display = 'none';
+        if (successPopup) successPopup.style.display = 'none';
+    }
+
+    // Show loading popup on form submit
+    document.getElementById('registerForm').addEventListener('submit', function() {
+        document.getElementById('loadingPopup').style.display = 'flex';
+    });
+
+    // Auto-show popups if they exist
+    window.onload = function() {
+        const errorPopup = document.getElementById('errorPopup');
+        const successPopup = document.getElementById('successPopup');
+        if (errorPopup) errorPopup.style.display = 'flex';
+        if (successPopup) successPopup.style.display = 'flex';
+    }
+</script>
+
+</body>
+</html>

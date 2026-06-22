@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description"
+        content="Asyle Data Solutions - Innovative Research & Development in IT, Data Science, and Technology Solutions">
+    <meta name="keywords"
+        content="Asyle Data Solutions, R&D, IT Innovation, Data Science, Technology Research, Software Development">
+    <meta name="author" content="Asyle Data Solutions">
+
+    <title>Asyle Data Solutions - R&D in IT & Data Innovation</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="/images/asyle-logo-icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+    <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/css/slicknav.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/swiper-bundle.min.css">
+    <link href="/css/all.min.css" rel="stylesheet" media="screen">
+    <link href="/css/animate.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/magnific-popup.css">
+    <link rel="stylesheet" href="/css/mousecursor.css">
+    <link href="/css/custom.css" rel="stylesheet" media="screen">
+    <link href="/css/toast.css" rel="stylesheet">
+    <link href="/css/chat-modern.css" rel="stylesheet">
+    <link href="/css/chat-modern.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="/css/chat-widget.css" rel="stylesheet">
+    <link href="/css/auth-modals.css" rel="stylesheet">
+    <%- include('chat-styles') %>
+</head>
+
+<body id="#top">
+
+    <!-- Auth Modal Overlay -->
+    <div class="auth-modal-overlay" id="authModalOverlay">
+        <div class="auth-modal-card" id="authModalCard">
+            <button class="auth-modal-close" id="authModalClose"><i class="fas fa-times"></i></button>
+            <div id="authModalContent">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <div class="topbar">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="topbar-contact-info">
+                        <ul>
+                            <li><a href="mailto:asyle@gmail.com"><i class="fa-solid fa-envelope"></i>
+                                    asyledatasolutions@gmail.com</a></li>
+                            <li><a href="tel:+919524335179"><i class="fa-solid fa-phone"></i> +91 95243 35179</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6 text-end">
+                    <div class="topbar-social-login">
+                        <div class="topbar-login-btn">
+                            <ul>
+                                <% if (user) { %>
+                                    <li><span class="text-white me-2">Hi, <%= user.username %></span></li>
+                                    <li><a href="/logout">Logout</a></li>
+                                    <% } else { %>
+                                        <li><a href="/login" id="linkLogin">Login</a></li>
+                                        <li><a href="/register" id="linkRegister">Registration</a></li>
+                                        <% } %>
+                            </ul>
+                        </div>
+
+                        <div class="topbar-social-links">
+                            <ul>
+                                <li><a href="https://twitter.com/asyle" target="_blank"><i
+                                            class="fa-brands fa-twitter"></i></a></li>
+                                <li><a href="https://facebook.com/asyle" target="_blank"><i
+                                            class="fa-brands fa-facebook-f"></i></a></li>
+                                <li><a href="https://instagram.com/asyle" target="_blank"><i
+                                            class="fa-brands fa-instagram"></i></a></li>
+                                <li><a href="https://www.linkedin.com/in/asyle-projects-762611264/" target="_blank"><i
+                                            class="fa-brands fa-linkedin-in"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <header class="main-header">
+        <div class="header-sticky shadow-sm">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container">
+                    <a class="navbar-brand d-flex align-items-center" href="/">
+                        <img src="/images/asyle-logo-icon.png" alt="Asyle Data Solutions Logo"
+                            style="width: 60px; height: 60px;">
+                        <span class="ms-2" style="font-family: 'Playfair Display', serif; 
+                               font-weight: 700; 
+                               font-size: 2rem; 
+                               color: #1a1a1a; 
+                               font-style: italic; 
+                               letter-spacing: 1px; 
+                               text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+                               transition: color 0.3s, transform 0.3s;">
+                            Asyle Data Solutions
+                        </span>
+                    </a>
+
+                    <div class="collapse navbar-collapse main-menu">
+                        <div class="nav-menu-wrapper">
+                            <ul class="navbar-nav mr-auto" id="menu">
+                                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
+
+                                <li class="nav-item submenu">
+                                    <a class="nav-link" href="#">Services</a>
+                                    <ul>
+                                        <li class="nav-item"><a class="nav-link" href="/phd-content-writing">PhD Content
+                                                Writing</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="/article-publication">Article
+                                                Publication</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="book-publication">Book
+                                                Publication</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="/data-analytics">Data Analytics
+                                                Solutions</a></li>
+                                        <li class="nav-item"><a class="nav-link" href="/data-collection">Data Collection
+                                                Services</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item submenu">
+                                    <a class="nav-link" href="#">Solutions</a>
+                                    <ul>
+                                        <li class="nav-item"><a class="nav-link" href="/case-studies">Case Studies</a>
+                                        </li>
+                                        <li class="nav-item"><a class="nav-link" href="/tools">Tools & Resources</a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item"><a class="nav-link" href="/contact">Contact Us</a></li>
+
+                                <!-- New Dashboard Link -->
+                                <% if (user) { %>
+                                    <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+                                    <% } %>
+                            </ul>
+                        </div>
+
+
+                        <div class="header-btn d-inline-flex align-items-center">
+                            <a href="tel:+911234567890" class="btn-contact me-2"><i class="bi bi-telephone"></i></a>
+                            <a href="/contact" class="btn-get-started">Get Started</a>
+                        </div>
+                        <style>
+                            .btn-get-started {
+                                display: inline-block;
+                                padding: 12px 36px;
+                                font-size: 16px;
+                                font-weight: 800;
+                                color: #000000;
+                                text-transform: uppercase;
+                                border-radius: 12px;
+                                background: rgba(226, 98, 1, 0.899);
+                                border: 2px solid rgba(59, 130, 246, 0.5);
+                                backdrop-filter: blur(10px);
+                                box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+                                position: relative;
+                                overflow: hidden;
+                                transition: all 0.4s ease;
+                            }
+
+                            .btn-get-started::after {
+                                content: '';
+                                position: absolute;
+                                top: -50%;
+                                left: -50%;
+                                width: 200%;
+                                height: 200%;
+                                background: rgba(255, 255, 255, 0.15);
+                                transform: rotate(45deg);
+                                transition: all 0.5s ease;
+                            }
+
+                            .btn-get-started:hover::after {
+                                top: -70%;
+                                left: -70%;
+                                width: 240%;
+                                height: 240%;
+                            }
+
+                            .btn-get-started:hover {
+                                color: #fff;
+                                background: rgba(1, 193, 226, 0.803);
+                                box-shadow: 0 12px 25px rgba(59, 130, 246, 0.6);
+                                transform: translateY(-3px);
+                                border-color: rgba(59, 130, 246, 0.8);
+                            }
+                        </style>
+                    </div>
+
+                    <div class="navbar-toggle"></div>
+                </div>
+            </nav>
+            <div class="responsive-menu"></div>
+        </div>
+    </header>
+
+    <script src="/js/toast.js"></script>
+
+    <script>
+        window.CHAT_USER = {
+            id: '<%= user ? user.id : (locals.guestId || "guest") %>',
+            username: '<%= user ? user.username : "Guest" %>'
+        };
+    </script>
+    <script src="/js/chat-widget.js" defer></script>
+
+    <script>
+        // Auth Modal Logic
+        const overlay = document.getElementById('authModalOverlay');
+        const modalContent = document.getElementById('authModalContent');
+        const closeBtn = document.getElementById('authModalClose');
+
+        function openAuthModal(type) {
+            const isLogin = type === 'login';
+            modalContent.innerHTML = `
+                <h2>${isLogin ? 'Welcome Back' : 'Create Account'}</h2>
+                <p class="subtitle">${isLogin ? 'Login to your account to continue' : 'Join Asyle Data Solutions today'}</p>
+                <div id="authError" style="color:#ef4444; background:rgba(239,68,68,0.1); padding:10px; border-radius:8px; margin-bottom:16px; font-size:0.85rem; display:none; text-align:center; border:1px solid rgba(239,68,68,0.2);"></div>
+                <form id="authForm" onsubmit="handleAuthSubmit(event, '${isLogin ? 'login' : 'register'}')">
+                    ${!isLogin ? `
+                    <div class="auth-input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="username" class="auth-input" placeholder="Username" required>
+                    </div>
+                    ` : ''}
+                    <div class="auth-input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" class="auth-input" placeholder="Email Address" required>
+                    </div>
+                    <div class="auth-input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" class="auth-input" placeholder="Password" required minlength="6">
+                    </div>
+                    <button type="submit" class="auth-btn-primary" id="authBtn">${isLogin ? 'Login' : 'Register'}</button>
+                </form>
+                <div class="auth-footer" id="authFooter">
+                    ${isLogin ? `Don't have an account? <a href="#" onclick="openAuthModal('register'); return false;">Register</a>`
+                    : `Already have an account? <a href="#" onclick="openAuthModal('login'); return false;">Login</a>`}
+                </div>
+            `;
+            overlay.classList.add('show');
+        }
+
+        async function handleAuthSubmit(e, type) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = document.getElementById('authBtn');
+            const errorDiv = document.getElementById('authError');
+            const card = document.getElementById('authModalCard');
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            card.classList.add('auth-loading');
+            errorDiv.style.display = 'none';
+
+            try {
+                // Since our current routes use standard form POST and redirect, 
+                // we need to handle them differently for AJAX.
+                // However, let's assume the server returns JSON for AJAX requests 
+                // or we can detect the redirect.
+                // For now, let's keep it simple: if redirect occurs, it will be handled by the browser 
+                // but fetch followed the redirect. 
+                // To be safe, let's just use standard submission but maybe we can make it look nicer.
+                // Actually, the request was "make it pop up".
+
+                const response = await fetch('/' + type, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                // If not redirected, it's likely an error (rendering the login page again)
+                // In our current index.js, POST /login renders 'login' with error if it fails.
+                // We'd need to modify index.js to support JSON responses for errors.
+                // Let's modify index.js slightly to support AJAX.
+                const text = await response.text();
+                if (text.includes('id="errorPopup"')) {
+                    // Extract error from rendered page placeholder
+                    const match = text.match(/<p>(.*?)<\/p>/);
+                    errorDiv.textContent = match ? match[1] : 'Authentication failed';
+                    errorDiv.style.display = 'block';
+                } else {
+                    // Try to parse as JSON if we can
+                    try {
+                        const json = JSON.parse(text);
+                        if (json.error) {
+                            errorDiv.textContent = json.error;
+                            errorDiv.style.display = 'block';
+                        }
+                    } catch (e) {
+                        // Fallback - maybe it worked but didn't redirect?
+                        location.reload();
+                    }
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Connection error. Please try again.';
+                errorDiv.style.display = 'block';
+            } finally {
+                card.classList.remove('auth-loading');
+            }
+        }
+
+        const linkLogin = document.getElementById('linkLogin');
+        const linkRegister = document.getElementById('linkRegister');
+
+        if (linkLogin) linkLogin.onclick = (e) => { e.preventDefault(); openAuthModal('login'); };
+        if (linkRegister) linkRegister.onclick = (e) => { e.preventDefault(); openAuthModal('register'); };
+
+        if (closeBtn) closeBtn.onclick = () => overlay.classList.remove('show');
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('show'); };
+    </script>
